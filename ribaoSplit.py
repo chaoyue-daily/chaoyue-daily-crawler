@@ -49,18 +49,28 @@ def save_article_html(url,title):
     response = requests.get(url,headers=headers).text
     soup = BeautifulSoup(response,'lxml')
     text = soup.find_all(name=['p','ol','noscript','a','h2'])
+    section = 0
+    sectionTile = ""
     # '''保存到文件'''
     for i in text:
         if i.img:
             del i.img['width']
             del i.img['height']
-        i = str(i).replace('"',"'")
-        if 'www.zhihu.com/people/chen-shu-shu-39-66' in i or 'aria-label' in i or 'TopicLink' in i:
+        doc = str(i).replace('"',"'")
+        if 'www.zhihu.com/people/chen-shu-shu-39-66' in doc or 'aria-label' in doc or 'TopicLink' in doc:
             pass
+        elif '<h2><b>' in doc or '<p><b>' in doc:   
+            section += 1
+            sectionTile = i.get_text()
+
+        if section == 0:
+            pass 
+        elif '广告' in  doc:
+            break;    
         else:
-            with open(title+'.html','a+',encoding='utf-8')as f:
+            with open(title+sectionTile+'.html','a+',encoding='utf-8')as f:
                 #f.write('<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'+'\n')
-                f.write(i+'\n')
+                f.write(doc+'\n')
 
 
 if __name__ == '__main__':
